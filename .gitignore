@@ -1,0 +1,11 @@
+.spyproject/
+Detected/
+Images/
+VGG/Clusters/
+VGG/Clusters_Yale/
+VGG/Detected/
+__pycache__/
+VGG/__pycache__/
+*.pyc
+opencv-face-recognition/
+
