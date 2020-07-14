@@ -7,6 +7,8 @@ Created on Thu Mar  5 15:47:56 2020
 """
 import os
 
+import sys
+
 from pprint import pprint
 
 import cv2
@@ -58,7 +60,8 @@ for ii,image_path in enumerate(imagePaths):
     
     embed_vecs = create_embeddings(image_path, detector, embedder,
                                    args["confidence"])
-    
+    print(embed_vecs.squeeze().shape)
+    sys.exit(0)
     if embed_vecs is None:
         continue
     

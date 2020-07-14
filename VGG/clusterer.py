@@ -75,6 +75,9 @@ for ii,image_path in enumerate(imagePaths):
     #print(type(embed_vecs))
     assert type(embed_vecs)==np.ndarray
     assert embed_vecs.ndim==2
+    #print(embed_vecs.shape)
+    #import sys
+    #sys.exit(0)
     
     if len(clusters)==0:
         for kk in range(len(embed_vecs)):

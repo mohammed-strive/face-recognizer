@@ -76,6 +76,13 @@ target_vec = np.squeeze(create_embeddings(target_image, detector,
 #print(target_vec)
 assert target_vec.ndim==1
 
+not_detected = 'NotDetected'
+
+if os.path.exists(not_detected):
+    rmtree(not_detected)
+    
+os.mkdir(not_detected)
+
 # loop over the image paths
 for (i, imagePath) in enumerate(imagePaths):
     # extract the person name from the image path
@@ -90,6 +97,7 @@ for (i, imagePath) in enumerate(imagePaths):
                                    conf_threshold)
     
     if embed_vecs is None:
+        copy(imagePath, not_detected)
         continue
     
     #print(embed_vecs.shape)
@@ -106,7 +114,7 @@ for (i, imagePath) in enumerate(imagePaths):
     
     max_sim = np.argmax(sims)
     
-    if sims[max_sim]>=0.7:
+    if sims[max_sim]>=0.6:
         #total += 1
         (startX, startY), (endX, endY) = boxes[max_sim]
         images_present.append(imagePath)
