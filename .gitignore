@@ -8,4 +8,6 @@ __pycache__/
 VGG/__pycache__/
 *.pyc
 opencv-face-recognition/
+VGG/Faces/
+VGG/NotDetected/
 

@@ -4,6 +4,9 @@
 Created on Wed Mar  4 12:47:45 2020
 
 @author: jvidyad
+This script is used to get a target image with possibly more than one face
+in it and then detect the same faces in a set of images and create 
+clusters.
 """
 
 from shutil import copy, rmtree
@@ -65,16 +68,19 @@ imagePaths = list(paths.list_images(args["dataset"]))
 # initialize the total number of faces processed
 #total = 0
 
-images_present = []
-
 target_image = args['target_image']
 
 conf_threshold = args["confidence"]
 
-target_vec = np.squeeze(create_embeddings(target_image, detector, 
-                                          embedder, conf_threshold)[0])
+target_vecs = create_embeddings(target_image, detector, 
+                                          embedder, conf_threshold)[0]
+
+for ii in range(len(target_vecs)):
+    os.mkdir('{:s}/{:d}'.format(detected_images_dir, ii+1))
 #print(target_vec)
-assert target_vec.ndim==1
+assert target_vecs.ndim==2
+
+images_present = [[]] * len(target_vecs)
 
 not_detected = 'NotDetected'
 
@@ -93,37 +99,42 @@ for (i, imagePath) in enumerate(imagePaths):
 	# load the image, resize it to have a width of 600 pixels (while
 	# maintaining the aspect ratio), and then grab the image
 	# dimensions
-    embed_vecs, boxes, image = create_embeddings(imagePath, detector, embedder,
-                                   conf_threshold)
+    embed_vecs, boxes, image = create_embeddings(imagePath, detector,
+                                                 embedder, conf_threshold)
     
     if embed_vecs is None:
         copy(imagePath, not_detected)
         continue
     
+    for jj, target_vec in enumerate(target_vecs, 1):
     #print(embed_vecs.shape)
-    sims = cosine_similarity(embed_vecs, np.expand_dims(target_vec, 0))
-    #print(sims)
-    sims = np.ravel(sims)
-    #print(sims)
-    
-#    if type(sims)==float:
-#        sims = np.array([sims])
+        sims = cosine_similarity(embed_vecs, np.expand_dims(target_vec,
+                                                            0))
+        #print(sims)
+        sims = np.ravel(sims)
+        #print(sims)
         
-    #print(sims.shape)
-    assert sims.ndim==1
-    
-    max_sim = np.argmax(sims)
-    
-    if sims[max_sim]>=0.7:
-        #total += 1
-        (startX, startY), (endX, endY) = boxes[max_sim]
-        images_present.append(imagePath)
-        image = cv2.rectangle(image, (startX, startY), (endX, endY), 
-                              (255, 0, 0), 2)
-        file_name = imagePath.split(os.sep)[-1]
-        cv2.imwrite(os.path.join(detected_images_dir, file_name), image)
+    #    if type(sims)==float:
+    #        sims = np.array([sims])
             
-print("Images in which target is present:")
+        #print(sims.shape)
+        assert sims.ndim==1
+        
+        max_sim = np.argmax(sims)
+        
+        if sims[max_sim]>=0.7:
+            #total += 1
+            (startX, startY), (endX, endY) = boxes[max_sim]
+            images_present[jj-1].append(imagePath)
+            temp = image.copy()
+            temp = cv2.rectangle(temp, (startX, startY), (endX, endY), 
+                                  (255, 0, 0), 2)
+            file_name = imagePath.split(os.sep)[-1]
+            cv2.imwrite(os.path.join(detected_images_dir, str(jj),
+                                     file_name), temp)
+            
+print("Images in which targets are present:")
 
-for image in images_present:
-    print(image)
+for clust in images_present:
+    for image in clust:
+        print(image)

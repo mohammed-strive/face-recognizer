@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar  4 12:47:45 2020
+Created on Tue Jul 21 20:23:31 2020
 
 @author: jvidyad
+This script gets images which contain a specific target face. The target 
+face has already been extracted and saved in a file.
 """
 
 from shutil import copy, rmtree
@@ -18,6 +20,7 @@ import os
 from sklearn.metrics.pairwise import cosine_similarity
 
 from keras_vggface.vggface import VGGFace
+from keras_vggface.utils import preprocess_input
 
 from create_embeddings import create_embeddings
 
@@ -58,21 +61,22 @@ embedder = VGGFace(model='resnet50', include_top=False,
 # grab the paths to the input images in our dataset
 print("[INFO] quantifying faces...")
 imagePaths = list(paths.list_images(args["dataset"]))
-# initialize our lists of extracted facial embeddings and
-# corresponding people names
-#knownEmbeddings = []
-#knownNames = []
-# initialize the total number of faces processed
-#total = 0
-
-images_present = []
 
 target_image = args['target_image']
 
 conf_threshold = args["confidence"]
 
-target_vec = np.squeeze(create_embeddings(target_image, detector, 
-                                          embedder, conf_threshold)[0])
+target_face = cv2.imread(target_image)
+
+faceBlob = cv2.dnn.blobFromImage(target_face, 1.0,
+    				(224, 224), (0, 0, 0), swapRB=True, crop=False)
+faceBlob = np.rollaxis(faceBlob, 2, 1)
+faceBlob = np.rollaxis(faceBlob, 3, 2)
+faceBlob = preprocess_input(faceBlob, version=2)
+
+target_vec = np.squeeze(embedder.predict(faceBlob))
+
+#print(target_vec)
 #print(target_vec)
 assert target_vec.ndim==1
 
@@ -82,6 +86,8 @@ if os.path.exists(not_detected):
     rmtree(not_detected)
     
 os.mkdir(not_detected)
+
+images_present = []
 
 # loop over the image paths
 for (i, imagePath) in enumerate(imagePaths):
