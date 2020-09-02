@@ -10,4 +10,7 @@ VGG/__pycache__/
 opencv-face-recognition/
 VGG/Faces/
 VGG/NotDetected/
+lfw/
+output/
+lfw.tgz
 
