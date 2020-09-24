@@ -35,4 +35,3 @@ def main(input_directory, model_path, classifier_output_path, batch_size,
     with tf.Session(config=tf.ConfigProto(log_device_placement=False)) as sess:
         train_set, test_set = _get_test_and_train_set(input_directory,
             min_num_images_perl_label=min_images_per_labels, split_ration=split_ratio)
-            

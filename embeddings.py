@@ -129,7 +129,7 @@ def split_dataset(dataset, split_ratio=0.8):
 
     return train_set, test_set
 
-class ImageClass():
+class ImageClass:
     def __init__(self, name, image_paths):
         self.name = name
         self.image_paths = image_paths
